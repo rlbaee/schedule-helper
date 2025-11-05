@@ -1,23 +1,45 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+class Lesson {
+  time: string;
+  name: string;
+  teacher: string;
+  rooms: string[];
+  groups: string[];
+
+  constructor(
+    time: string,
+    name: string,
+    teacher: string,
+    rooms: string[],
+    groups: string[]
+  ) {
+    this.time = time;
+    this.name = name;
+    this.teacher = teacher;
+    this.rooms = rooms;
+    this.groups = groups;
+  }
+}
 
 export default function GroupSchedule({ groupCode }: { groupCode: string }) {
-  const { data, error, isLoading } = useSWR(
-    `/api/timetableByGroupCode?groupCode=${groupCode}`,
-    fetcher
-  );
+  date = new Date();
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        `/api/timetableByGroupCode?groupCode=${groupCode}`
+      );
+      const data = await response.json();
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No data found</div>;
+      setData(data);
+    }
 
-  return (
-    <div className="group">
-      {/* Render your schedule data here */}
-      {JSON.stringify(data)}
-    </div>
-  );
+    fetchData();
+  }, [groupCode]);
+
+  return <div className="group"></div>;
 }
